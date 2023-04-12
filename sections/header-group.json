@@ -13,10 +13,25 @@
             "color_scheme": "accent-2",
             "link": ""
           }
+        },
+        "4764a4d8-2853-47a4-b08e-eb01bc5af303": {
+          "type": "countdown",
+          "settings": {
+            "enable_countdown": true,
+            "background_color": "#80411e",
+            "text_color": "#ffffff",
+            "top_margin": 5,
+            "timer_date": "2023-08-01",
+            "timer_days_label": "Days",
+            "timer_hours_label": "Hours",
+            "timer_minutes_label": "Minutes",
+            "timer_seconds_label": "Seconds"
+          }
         }
       },
       "block_order": [
-        "announcement-bar-0"
+        "announcement-bar-0",
+        "4764a4d8-2853-47a4-b08e-eb01bc5af303"
       ],
       "settings": {}
     },
