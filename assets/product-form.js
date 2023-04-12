@@ -7,19 +7,19 @@ if (!customElements.get('product-form')) {
       this.form.querySelector('[name=id]').disabled = false;
       this.form.addEventListener('submit', this.onSubmitHandler.bind(this));
       this.cart = document.querySelector('cart-notification') || document.querySelector('cart-drawer');
-      this.submitButton = this.querySelector('[type="submit"]');
-      if (document.querySelector('cart-drawer')) this.submitButton.setAttribute('aria-haspopup', 'dialog');
+      this.submitButton = document.querySelector('.product-form__submit');
+      if (document.querySelector('cart-drawer')) { this.submitButton.setAttribute('aria-haspopup', 'dialog') };
     }
 
     onSubmitHandler(evt) {
       evt.preventDefault();
-      if (this.submitButton.getAttribute('aria-disabled') === 'true') return;
+      //if (this.submitButton.getAttribute('aria-disabled') === 'true') return;
 
       this.handleErrorMessage();
 
       this.submitButton.setAttribute('aria-disabled', true);
       this.submitButton.classList.add('loading');
-      this.querySelector('.loading-overlay__spinner').classList.remove('hidden');
+      //this.querySelector('.loading-overlay__spinner').classList.remove('hidden');
 
       const config = fetchConfig('javascript');
       config.headers['X-Requested-With'] = 'XMLHttpRequest';
@@ -61,6 +61,16 @@ if (!customElements.get('product-form')) {
             quickAddModal.hide(true);
           } else {
             this.cart.renderContents(response);
+
+            /* if the added product's handle includes string "upsell", hide the in-cart upsell option */
+            let upsellMatch = response.handle.includes("upsell")
+            
+            if (upsellMatch) {
+              document.querySelector("#upsell-item").classList.add("hidden");
+              document.querySelector("#upsell-headline").classList.add("hidden");
+              document.querySelector("#CartDrawer-Item-1 .cart-quantity").classList.add("hidden");
+            }
+
           }
         })
         .catch((e) => {
@@ -70,7 +80,7 @@ if (!customElements.get('product-form')) {
           this.submitButton.classList.remove('loading');
           if (this.cart && this.cart.classList.contains('is-empty')) this.cart.classList.remove('is-empty');
           if (!this.error) this.submitButton.removeAttribute('aria-disabled');
-          this.querySelector('.loading-overlay__spinner').classList.add('hidden');
+          //this.querySelector('.loading-overlay__spinner').classList.add('hidden');
         });
     }
 
