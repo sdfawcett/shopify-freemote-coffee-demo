@@ -1,8 +1,3 @@
-<script
-  src="https://code.jquery.com/jquery-3.6.4.min.js"
-  integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8="
-  crossorigin="anonymous"></script>
-
 {%- for block in section.blocks -%}
   {%- case block.type -%}
     {%- when 'announcement' -%}
@@ -34,88 +29,21 @@
     {%- when 'countdown' -%}
     {%- if block.settings.enable_countdown -%}
 
-      <script>
-        window.onload = function() {
-          if (typeof jQuery === 'undefined') {
-            return;
-          }
+      <div id="countdown-container" style="background-color: {{ block.settings.background_color }}; color: {{ block.settings.text_color }};">
 
-          mwAnnouncementBar.init();
-        }
+        {%- if block.settings.custom_timer_text != nil -%}
+          <div class="countdown-custom-text" style="color: {{ block.settings.text_color }};">
+            {{ block.settings.custom_timer_text }}
+          </div>
+        {%- endif -%}
 
-        var mwAnnouncementBar = (function() {
-          var ID = 'mw-announcement-bar',
-            TEXT = '{{ block.settings.text }}',
-            BACKGROUND_COLOR = '{{ block.settings.background_color }}',
-            TEXT_COLOR = '{{ block.settings.text_color }}',
-            TOP_MARGIN = {{ block.settings.top_margin }},
-            COUNTDOWN_TIMER_ENABLED = {{ block.settings.enable_countdown }},
-            COUNTDOWN_TIMER_DATE = {{ block.settings.timer_date | json }},
-            $timer,
-            $bar;
-
-          function buildBar() {
-            var $textContent = $('<div class="mw-announcement-bar__text" />');
-            $textContent.html(TEXT);
-
-            $bar = $('<div id="' + ID + '" />').css({
-              'background': BACKGROUND_COLOR,
-              'color': TEXT_COLOR,
-              'margin-top': TOP_MARGIN + 'px'
-            }).append($textContent);
-
-            if (COUNTDOWN_TIMER_ENABLED && new Date(COUNTDOWN_TIMER_DATE)instanceof Date && !isNaN(new Date(COUNTDOWN_TIMER_DATE))) {
-              $timer = $('<div class="mw-announcement-bar__timer"/>');
-              $bar.append($timer);
-
-              var timer = buildTimer($timer);
-
-              if (timer === false) {
-                return;
-              }
-            }
-
-            $('.announcement-bar-section .page-width').append($bar);
-
-          }
-
-          function buildTimer($timer) {
-            var today = new Date().getTime();
-            var endTime = new Date(COUNTDOWN_TIMER_DATE).setHours(0, 0, 0, 0);
-            var diff = endTime - today;
-
-            if (diff > 0) {
-              var timer = setInterval((function tick() {
-                var now = new Date().getTime(),
-                  distance = (endTime - now),
-                  days = Math.floor(distance / (1000 * 60 * 60 * 24)),
-                  hours = ('00' + Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).slice(-2),
-                  minutes = ('00' + Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))).slice(-2),
-                  seconds = ('00' + Math.floor((distance % (1000 * 60)) / 1000)).slice(-2),
-                  clientTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-                if (distance < 0) {
-                  clearInterval(timer);
-
-                  return null;
-                }
-
-                $timer.html('<span class="mw-announcement-bar__timer__value">' + '<span class="mw-announcement-bar__timer__digit">' + days + '</span>' + '<span class="mw-announcement-bar__timer__label">  {{ block.settings.timer_days_label }} </span>' + '</span>' + '<span class="mw-announcement-bar__timer__value">' + '<span class="mw-announcement-bar__timer__digit">' + hours + '</span>' + '<span class="mw-announcement-bar__timer__label">  {{ block.settings.timer_hours_label }} </span>' + '</span>' + '<span class="mw-announcement-bar__timer__value">' + '<span class="mw-announcement-bar__timer__digit">' + minutes + '</span>' + '<span class="mw-announcement-bar__timer__label">  {{ block.settings.timer_minutes_label }} </span>' + '</span>' + '<span class="mw-announcement-bar__timer__value">' + '<span class="mw-announcement-bar__timer__digit">' + seconds + '</span>' + '<span class="mw-announcement-bar__timer__label">  {{ block.settings.timer_seconds_label }} </span>' + '</span>');
-
-                return tick;
-              })(), 1000);
-            } else {
-              return false;
-            }
-          }
-
-          function init() {
-            buildBar();
-          }
-
-          return {init: init}
-        })();
-      </script>
+        <div class="countdown" data-date="{{ block.settings.timer_date }}" data-time="{{ block.settings.time_of_day }}">
+          <div class="day"><span class="num"></span><span class="word"></span></div>
+          <div class="hour"><span class="num"></span><span class="word"></span></div>
+          <div class="min"><span class="num"></span><span class="word"></span></div>
+          <div class="sec"><span class="num"></span><span class="word"></span></div>
+        </div>
+      </div>
 
     {%- endif -%}
   {%- endcase -%}
@@ -207,40 +135,26 @@
             "id": "text_color",
             "label": "Text color",
             "default": "#ffffff"
-          },
-          {
-            "type": "number",
-            "id": "top_margin",
-            "default": 0,
-            "label": "Top margin (px)"
           }, {
             "type": "header",
-            "content": "Countdown timer"
-          }, {
+            "content": "Countdown date and time settings"
+          },
+          {
+            "type": "text",
+            "id": "custom_timer_text",
+            "label": "Text to appear with countdown timer"
+          },
+           {
             "type": "text",
             "id": "timer_date",
             "label": "Expiration date",
-            "info": "Format: YYYY-MM-DD"
-          }, {
+            "info": "Format: DD-MM-YYYY"
+          },
+          {
             "type": "text",
-            "id": "timer_days_label",
-            "label": "Days label",
-            "default": "Days"
-          }, {
-            "type": "text",
-            "id": "timer_hours_label",
-            "label": "Hours label",
-            "default": "Hours"
-          }, {
-            "type": "text",
-            "id": "timer_minutes_label",
-            "label": "Minutes label",
-            "default": "Minutes"
-          }, {
-            "type": "text",
-            "id": "timer_seconds_label",
-            "label": "Seconds label",
-            "default": "Seconds"
+            "id": "time_of_day",
+            "label": "Time of day",
+            "info": "Format: 09:00"
           }
         ]
       }
@@ -254,3 +168,84 @@
     }
   }
 {% endschema %}
+
+{%  javascript  %}  
+
+const $ = elem => document.querySelector(elem);
+
+const countdown = function(_config) {
+  const tarDate = $(_config.target).getAttribute('data-date').split('-');
+  
+  const day = parseInt(tarDate[0]);
+  const month = parseInt(tarDate[1]);
+  const year = parseInt(tarDate[2]);
+  let tarTime = $(_config.target).getAttribute('data-time');
+  let tarhour, tarmin;
+
+  if (tarTime != null) {
+    tarTime = tarTime.split(':');
+    tarhour = parseInt(tarTime[0]);
+    tarmin = parseInt(tarTime[1]);
+  }
+
+  let months = [31, new Date().getFullYear() % 4 == 0 ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  let dateNow = new Date();
+  let dayNow = dateNow.getDate();
+  let monthNow = dateNow.getMonth() + 1;
+  let yearNow = dateNow.getFullYear();
+  let hourNow = dateNow.getHours();
+  let minNow = dateNow.getMinutes();
+  let count_day = 0, count_hour = 0, count_min = 0;
+  let count_day_isSet = false;
+  let isOver = false;
+
+  // set the countdown end date
+  const countDownDate = new Date(year, month-1, day, tarhour, tarmin, 0, 0).getTime();
+
+  $(_config.target+' .day .word').innerHTML = _config.dayWord;
+  $(_config.target+' .hour .word').innerHTML = _config.hourWord;
+  $(_config.target+' .min .word').innerHTML = _config.minWord;
+  $(_config.target+' .sec .word').innerHTML = _config.secWord; 
+
+  const updateTime = () => {
+    // get current date and time
+    const now = new Date().getTime();
+
+    console.log(tarDate);
+
+    // get the distance between now and the countdown end date
+    const distance = countDownDate - now;
+
+    // time calculations for days, hours, minutes and seconds
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    requestAnimationFrame(updateTime);
+
+    $(_config.target+' .day .num').innerHTML = addZero(days);
+    $(_config.target+' .hour .num').innerHTML = addZero(hours);
+    $(_config.target+' .min .num').innerHTML = addZero(minutes);
+    $(_config.target+' .sec .num').innerHTML = addZero(seconds);
+
+    // if the countdown is over, write this text to element with class "countdown"
+    if (distance < 0) {
+      $(".countdown").innerHTML = "EXPIRED";
+    }
+  }
+
+  updateTime();
+}
+
+const addZero = (x) => (x < 10 && x >= 0) ? "0" + x : x;
+
+const efcc_countdown = new countdown({
+  target: '.countdown',
+  dayWord: ' d',
+  hourWord: ' h',
+  minWord: ' m',
+  secWord: ' s'
+});
+
+{% endjavascript %}
