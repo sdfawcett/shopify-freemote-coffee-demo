@@ -1,5 +1,11 @@
 {{ 'section-image-banner.css' | asset_url | stylesheet_tag }}
 
+{% comment  %} creating dom nodes to hold video url values from customizer so they can be read in javascript {% endcomment %}
+{% assign desktop_video_link = section.settings.video_url_desktop %}
+{% assign mobile_video_link = section.settings.video_url_mobile %}
+<p id="desktop-video-url-container" style="display: none">{{desktop_video_link}}</p>
+<p id="mobile-video-url-container" style="display: none">{{mobile_video_link}}</p>
+
 {%- if section.settings.image_height == 'adapt' and section.settings.image != blank -%}
   {%- style -%}
     @media screen and (max-width: 749px) {
@@ -31,29 +37,14 @@
 
 <div id="Banner-{{ section.id }}" class="banner banner--content-align-{{ section.settings.desktop_content_alignment }} banner--content-align-mobile-{{ section.settings.mobile_content_alignment }} banner--{{ section.settings.image_height }}{% if section.settings.stack_images_on_mobile and section.settings.image != blank and section.settings.image_2 != blank %} banner--stacked{% endif %}{% if section.settings.image_height == 'adapt' and section.settings.image != blank %} banner--adapt{% endif %}{% if section.settings.show_text_below %} banner--mobile-bottom{%- endif -%}{% if section.settings.show_text_box == false %} banner--desktop-transparent{% endif %} {% if section.settings.video_background %} video-background{% endif %}">
 
-  {%- if section.settings.video_background and section.settings.video_url_desktop != nil -%}
+  {%- if section.settings.video_background -%}
     <div id="desktop-video" class="banner__media media video-background">
       <video
         autoplay
         muted
         loop
         playsinline
-        id="myVideoDesktop">
-        <source src="{{ section.settings.video_url_desktop }}" type="video/mp4">
-        Your browser does not support HTML5 video.
-      </video>
-    </div>
-  {%- endif -%}
-
-  {%- if section.settings.video_background and section.settings.video_url_mobile != nil -%}
-    <div id="mobile-video" class="banner__media media video-background">
-      <video
-        autoplay
-        muted
-        loop
-        playsinline
-        id="myVideoMobile">
-        <source src="{{ section.settings.video_url_mobile }}" type="video/mp4">
+        id="video-element">
         Your browser does not support HTML5 video.
       </video>
     </div>
@@ -461,3 +452,37 @@
     ]
   }
 {% endschema %}
+
+{%  javascript  %} 
+
+/*script for responsive video loading*/
+var desktopVideoUrl = document.getElementById("desktop-video-url-container").innerHTML;
+var mobileVideoUrl = document.getElementById("mobile-video-url-container").innerHTML;
+var w = window.matchMedia("(max-width: 700px)");
+var vid = document.querySelector("#video-element");
+var source = document.createElement("source");
+source.id = "hvid";
+source.setAttribute("type", "video/mp4");
+vid.appendChild(source);
+
+if (w.matches) {
+   source.removeAttribute("src");
+   source.setAttribute("src", mobileVideoUrl);
+} else {
+   source.removeAttribute("src");
+   source.setAttribute("src", desktopVideoUrl);
+}
+
+window.addEventListener("resize", function () {
+   var w = window.matchMedia("(max-width: 700px)");
+   var vid = document.querySelector("#video-element");
+   var source = document.getElementById("hvid");
+
+   if (w.matches) {
+      source.src = mobileVideoUrl;
+   } else {
+      source.src = desktopVideoUrl;
+   }
+});
+
+{% endjavascript %} 
